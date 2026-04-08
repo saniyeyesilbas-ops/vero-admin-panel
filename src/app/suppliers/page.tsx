@@ -22,7 +22,7 @@ export default function SuppliersPage() {
 
   const filteredSuppliers = mockSuppliers.filter((s) =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.tags.some((t) =
+    s.tags.some((t) =>
       t.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
