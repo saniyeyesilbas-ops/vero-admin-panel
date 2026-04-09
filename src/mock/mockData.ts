@@ -9,7 +9,72 @@ import {
   Expense,
   Invoice,
   ExpenseDocument,
+  SystemAlert,
 } from "@/lib/types";
+
+export const mockAlerts: SystemAlert[] = [
+  {
+    id: "alert-1",
+    type: "BAKIM_GECMIS",
+    vehiclePlate: "34 ABC 123",
+    vehicleId: "v1",
+    message: "Periyodik bakım süresi geçti (15.000 km veya 365 gün)",
+    createdAt: "2026-04-01",
+    status: "ACIK",
+    severity: "ACIL",
+  },
+  {
+    id: "alert-2",
+    type: "SIGORTA_YAKLASIYOR",
+    vehiclePlate: "06 DEF 456",
+    vehicleId: "v2",
+    message: "Trafik sigortası bitimine 10 gün kaldı",
+    createdAt: "2026-04-05",
+    status: "ACIK",
+    severity: "YUKSEK",
+  },
+  {
+    id: "alert-3",
+    type: "MUAYENE_YAKLASIYOR",
+    vehiclePlate: "34 ABC 123",
+    vehicleId: "v1",
+    message: "Muayene tarihine 15 gün kaldı",
+    createdAt: "2026-04-05",
+    status: "ACIK",
+    severity: "ORTA",
+  },
+  {
+    id: "alert-4",
+    type: "KM_GUNCELLEME",
+    vehiclePlate: "06 DEF 456",
+    vehicleId: "v2",
+    message: "Son 6 ayda kilometre güncellenmemiş",
+    createdAt: "2026-04-03",
+    status: "ACIK",
+    severity: "DUSUK",
+  },
+  {
+    id: "alert-5",
+    type: "TALEP_BEKLIYOR",
+    vehiclePlate: "34 ABC 123",
+    vehicleId: "v1",
+    message: "2 gündür açık bekleyen talep var",
+    createdAt: "2026-04-04",
+    status: "ACIK",
+    severity: "YUKSEK",
+    relatedRequestId: "r1",
+  },
+  {
+    id: "alert-6",
+    type: "SERVIS_UZUN_SURE",
+    vehiclePlate: "34 ABC 123",
+    vehicleId: "v1",
+    message: "Serviste 15 günden uzun süredir (Hasar/Arıza)",
+    createdAt: "2026-04-02",
+    status: "ACIK",
+    severity: "YUKSEK",
+  },
+];
 
 export const mockCustomers: Customer[] = [
   {

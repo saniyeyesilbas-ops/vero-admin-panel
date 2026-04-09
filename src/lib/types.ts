@@ -10,6 +10,30 @@ export type ExpenseGroup =
 
 export type ExpenseStatus = "BEKLIYOR" | "ONAYLANDI" | "REDDEDILDI";
 
+export type AlertType = 
+  | "BAKIM_GECMIS"
+  | "SIGORTA_YAKLASIYOR"
+  | "SIGORTA_GECMIS"
+  | "MUAYENE_YAKLASIYOR"
+  | "MUAYENE_GECMIS"
+  | "KM_GUNCELLEME"
+  | "TALEP_BEKLIYOR"
+  | "SERVIS_UZUN_SURE";
+
+export type AlertStatus = "ACIK" | "ELE_ALINDI" | "MASKELE";
+
+export interface SystemAlert {
+  id: string;
+  type: AlertType;
+  vehiclePlate: string;
+  vehicleId: string;
+  message: string;
+  createdAt: string;
+  status: AlertStatus;
+  severity: "DUSUK" | "ORTA" | "YUKSEK" | "ACIL";
+  relatedRequestId?: string;
+}
+
 export interface ExpenseLine {
   id: string;
   itemName: string;

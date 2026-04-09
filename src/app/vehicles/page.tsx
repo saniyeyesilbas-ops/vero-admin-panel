@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import { mockVehicles, vehicleStatuses, fuelTypes, transmissionTypes, serviceTypes, acquisitionTypes } from "@/mock/mockData";
-import { Car, Plus, Search, User, Building2, Settings, Fuel, Calendar } from "lucide-react";
+import { Car, Plus, Search, User, Building2, Settings, Fuel, Calendar, Wrench, Shield } from "lucide-react";
 
 export default function VehiclesPage() {
   const router = useRouter();
   const [userRole, setUserRole] = useState<"VA" | "FY" | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedTab, setSelectedTab] = useState("zorunlu");
+  const [selectedTab, setSelectedTab] = useState<"kimlik" | "sahiplik" | "operasyonel" | "teknik">("kimlik");
 
   useEffect(() => {
     const role = localStorage.getItem("userRole") as "VA" | "FY" | null;
@@ -29,12 +29,10 @@ export default function VehiclesPage() {
   );
 
   const tabs = [
-    { id: "zorunlu", label: "Zorunlu Bilgiler" },
-    { id: "musteri", label: "Müşteri/Sürücü" },
-    { id: "fiziksel", label: "Fiziksel Özellikler" },
-    { id: "lastik", label: "Lastik" },
-    { id: "teknik", label: "Teknik Özellikler" },
-    { id: "finansal", label: "Finansal" },
+    { id: "kimlik", label: "Kimlik & Temel" },
+    { id: "sahiplik", label: "Sahiplik & Sözleşme" },
+    { id: "operasyonel", label: "Operasyonel" },
+    { id: "teknik", label: "Teknik & Yasal" },
   ];
 
   if (!userRole) return null;
@@ -73,7 +71,7 @@ export default function VehiclesPage() {
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setSelectedTab(tab.id)}
+                onClick={() => setSelectedTab(tab.id as any)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
                   selectedTab === tab.id
                     ? "bg-primary-600 text-white"
@@ -99,7 +97,7 @@ export default function VehiclesPage() {
                   className="p-4 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-start justify-between">
-                    <div className="space-y-2">
+                    <div className="space-y-3 w-full">
                       {/* Plaka ve Temel Bilgiler */}
                       <div className="flex items-center gap-3">
                         <span className="text-lg font-bold text-gray-900 bg-primary-50 px-3 py-1 rounded-lg">
@@ -116,148 +114,243 @@ export default function VehiclesPage() {
                         }`}>
                           {vehicleStatuses.find((s) => s.value === vehicle.status)?.label}
                         </span>
-                        <span className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded-full">
-                          {acquisitionTypes.find((a) => a.value === vehicle.acquisitionType)?.label}
-                        </span>
                       </div>
 
-                      {/* Seçili Sekmeye Göre İçerik */}
-                      {selectedTab === "zorunlu" && (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      {/* SEKME 1: Kimlik & Temel Bilgiler */}
+                      {selectedTab === "kimlik" && (
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                           <div>
-                            <p className="text-gray-400 text-xs">Marka/Model</p>
-                            <p className="font-medium">{vehicle.brand} {vehicle.model}</p>
+                            <p className="text-gray-400 text-xs">Marka *</p>
+                            <p className="font-medium">{vehicle.brand}</p>
                           </div>
                           <div>
-                            <p className="text-gray-400 text-xs">Model Yılı</p>
+                            <p className="text-gray-400 text-xs">Model *</p>
+                            <p className="font-medium">{vehicle.model}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-xs">Model Yılı *</p>
                             <p className="font-medium">{vehicle.modelYear}</p>
                           </div>
                           <div>
-                            <p className="text-gray-400 text-xs">Yakıt</p>
-                            <p className="font-medium">{fuelTypes.find((f) => f.value === vehicle.fuel)?.label}</p>
+                            <p className="text-gray-400 text-xs">Şasi No *</p>
+                            <p className="font-medium font-mono text-xs">{vehicle.chassisNo}</p>
                           </div>
                           <div>
-                            <p className="text-gray-400 text-xs">Vites</p>
+                            <p className="text-gray-400 text-xs">Vites *</p>
                             <p className="font-medium">{transmissionTypes.find((t) => t.value === vehicle.transmission)?.label}</p>
                           </div>
                           <div>
-                            <p className="text-gray-400 text-xs">Servis Tipi</p>
-                            <p className="font-medium">{serviceTypes.find((s) => s.value === vehicle.serviceType)?.label}</p>
+                            <p className="text-gray-400 text-xs">Yakıt *</p>
+                            <p className="font-medium">{fuelTypes.find((f) => f.value === vehicle.fuel)?.label}</p>
                           </div>
                           <div>
-                            <p className="text-gray-400 text-xs">Muayene</p>
-                            <p className="font-medium">{vehicle.inspectionDate}</p>
-                          </div>
-                          <div className="col-span-2">
-                            <p className="text-gray-400 text-xs">Şasi No</p>
-                            <p className="font-medium font-mono">{vehicle.chassisNo}</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {selectedTab === "musteri" && (
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <div className="flex items-center gap-1 text-gray-400 text-xs">
-                              <Building2 className="w-3 h-3" />
-                              Müşteri
-                            </div>
-                            <p className="font-medium">{vehicle.customerName || "-"}</p>
+                            <p className="text-gray-400 text-xs">Motor No *</p>
+                            <p className="font-medium font-mono text-xs">{vehicle.engineNo}</p>
                           </div>
                           <div>
-                            <div className="flex items-center gap-1 text-gray-400 text-xs">
-                              <User className="w-3 h-3" />
-                              Sürücü
-                            </div>
-                            <p className="font-medium">{vehicle.driverName || "-"}</p>
+                            <p className="text-gray-400 text-xs">Ruhsat No *</p>
+                            <p className="font-medium">{vehicle.registrationNo}</p>
                           </div>
-                          {vehicle.driverPhone && (
-                            <div>
-                              <p className="text-gray-400 text-xs">Sürücü Telefon</p>
-                              <p className="font-medium">{vehicle.driverPhone}</p>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {selectedTab === "fiziksel" && (
-                        <div className="grid grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <p className="text-gray-400 text-xs">Tescil Tarihi *</p>
+                            <p className="font-medium">{vehicle.registrationDate}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-xs">Araç Durumu *</p>
+                            <p className="font-medium">{vehicleStatuses.find((s) => s.value === vehicle.status)?.label}</p>
+                          </div>
                           <div>
                             <p className="text-gray-400 text-xs">Renk</p>
                             <p className="font-medium">{vehicle.color || "-"}</p>
                           </div>
-                          <div>
-                            <p className="text-gray-400 text-xs">Kasa Tipi</p>
-                            <p className="font-medium">{vehicle.bodyType || "-"}</p>
-                          </div>
-                          <div>
-                            <p className="text-gray-400 text-xs">Kapı Sayısı</p>
-                            <p className="font-medium">{vehicle.doorCount || "-"}</p>
-                          </div>
-                          <div>
-                            <p className="text-gray-400 text-xs">Koltuk Sayısı</p>
-                            <p className="font-medium">{vehicle.seatCount || "-"}</p>
-                          </div>
                         </div>
                       )}
 
-                      {selectedTab === "lastik" && (
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div className="space-y-1">
-                            <p className="font-medium text-gray-700">Yaz Lastiği</p>
-                            <p className="text-gray-400 text-xs">Marka: {vehicle.summerTireBrand || "-"}</p>
-                            <p className="text-gray-400 text-xs">Ebat: {vehicle.summerTireSize || "-"}</p>
-                            <p className="text-gray-400 text-xs">DOT: {vehicle.summerTireDot || "-"}</p>
-                          </div>
-                          <div className="space-y-1">
-                            <p className="font-medium text-gray-700">Kış Lastiği</p>
-                            <p className="text-gray-400 text-xs">Marka: {vehicle.winterTireBrand || "-"}</p>
-                            <p className="text-gray-400 text-xs">Ebat: {vehicle.winterTireSize || "-"}</p>
-                            <p className="text-gray-400 text-xs">Durum: {vehicle.winterTireStatus || "-"}</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {selectedTab === "teknik" && (
-                        <div className="grid grid-cols-4 gap-4 text-sm">
+                      {/* SEKME 2: Sahiplik & Sözleşme */}
+                      {selectedTab === "sahiplik" && (
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                           <div>
-                            <div className="flex items-center gap-1 text-gray-400 text-xs">
-                              <Settings className="w-3 h-3" />
-                              GPS/CAN
-                            </div>
-                            <p className="font-medium">{vehicle.hasGps ? "Var" : "Yok"}</p>
+                            <p className="text-gray-400 text-xs">Edinim Şekli *</p>
+                            <p className="font-medium">{acquisitionTypes.find((a) => a.value === vehicle.acquisitionType)?.label}</p>
                           </div>
                           <div>
-                            <p className="text-gray-400 text-xs">Vale</p>
-                            <p className="font-medium">{vehicle.hasVale ? "Var" : "Yok"}</p>
-                          </div>
-                          <div>
-                            <p className="text-gray-400 text-xs">Yedek Anahtar</p>
-                            <p className="font-medium">{vehicle.spareKey ? "Var" : "Yok"}</p>
-                          </div>
-                          <div>
-                            <p className="text-gray-400 text-xs">Kasko Değeri</p>
-                            <p className="font-medium">{vehicle.insuranceValue ? `${vehicle.insuranceValue.toLocaleString("tr-TR")} TL` : "-"}</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {selectedTab === "finansal" && (
-                        <div className="grid grid-cols-3 gap-4 text-sm">
-                          <div>
-                            <div className="flex items-center gap-1 text-gray-400 text-xs">
-                              <Calendar className="w-3 h-3" />
-                              Kira Başlangıç
-                            </div>
+                            <p className="text-gray-400 text-xs">Fatura Tarihi</p>
                             <p className="font-medium">{vehicle.rentalStart || "-"}</p>
                           </div>
                           <div>
-                            <p className="text-gray-400 text-xs">Kira Bitiş</p>
+                            <p className="text-gray-400 text-xs">Fatura Bedeli</p>
+                            <p className="font-medium">-</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-xs">Aylık Kira Bedeli</p>
+                            <p className="font-medium">{vehicle.rentalAmount ? `${vehicle.rentalAmount.toLocaleString("tr-TR")} TL` : "-"}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-xs">Kira Süresi (Ay)</p>
+                            <p className="font-medium">-</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-xs">Yıllık KM Limiti</p>
+                            <p className="font-medium">-</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-xs">KM Aşım Ücreti</p>
+                            <p className="font-medium">-</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-xs">KM İade Ücreti</p>
+                            <p className="font-medium">-</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-xs">Muafiyet</p>
+                            <p className="font-medium">-</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-xs">Beyan Limiti</p>
+                            <p className="font-medium">-</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-xs">Kira Başlangıç</p>
+                            <p className="font-medium">{vehicle.rentalStart || "-"}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-xs">Planlanan İade</p>
                             <p className="font-medium">{vehicle.rentalEnd || "-"}</p>
                           </div>
                           <div>
-                            <p className="text-gray-400 text-xs">Kira Tutarı</p>
-                            <p className="font-medium">{vehicle.rentalAmount ? `${vehicle.rentalAmount.toLocaleString("tr-TR")} ${vehicle.rentalCurrency}` : "-"}</p>
+                            <p className="text-gray-400 text-xs">Gerçek İade / Satış</p>
+                            <p className="font-medium">-</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-xs">Kiralama Firması</p>
+                            <p className="font-medium">-</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* SEKME 3: Operasyonel Bilgiler */}
+                      {selectedTab === "operasyonel" && (
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                          <div>
+                            <p className="text-gray-400 text-xs">Son Kilometre</p>
+                            <p className="font-medium">45.230 km</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-xs">Son KM Tarihi</p>
+                            <p className="font-medium">15.03.2026</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-xs">HGS Etiket No</p>
+                            <p className="font-medium">-</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-xs">Vale Hizmeti</p>
+                            <p className="font-medium">{vehicle.hasVale ? "Var" : "Yok"}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-xs">Kullanım Amacı</p>
+                            <p className="font-medium">-</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-xs">Masraf Merkezi</p>
+                            <p className="font-medium">-</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-xs">Şehir</p>
+                            <p className="font-medium">İstanbul</p>
+                          </div>
+                          <div className="col-span-2 md:col-span-3 border-t pt-3 mt-2">
+                            <p className="text-gray-400 text-xs mb-2">Araç Kullanıcısı</p>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                              <div>
+                                <p className="text-gray-400 text-xs">Ad Soyad</p>
+                                <p className="font-medium">{vehicle.driverName || "-"}</p>
+                              </div>
+                              <div>
+                                <p className="text-gray-400 text-xs">Telefon</p>
+                                <p className="font-medium">{vehicle.driverPhone || "-"}</p>
+                              </div>
+                              <div>
+                                <p className="text-gray-400 text-xs">Mail</p>
+                                <p className="font-medium">{vehicle.driverEmail || "-"}</p>
+                              </div>
+                              <div>
+                                <p className="text-gray-400 text-xs">TCKN</p>
+                                <p className="font-medium">-</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* SEKME 4: Teknik & Yasal */}
+                      {selectedTab === "teknik" && (
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                            <div>
+                              <p className="text-gray-400 text-xs">Servis Tipi *</p>
+                              <p className="font-medium">{serviceTypes.find((s) => s.value === vehicle.serviceType)?.label}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-400 text-xs">Muayene Tarihi *</p>
+                              <p className="font-medium">{vehicle.inspectionDate || "-"}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-400 text-xs">Trafik Sigortası Bitiş *</p>
+                              <p className="font-medium">{vehicle.insuranceEndDate || "-"}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-400 text-xs">Yetkili Marka</p>
+                              <p className="font-medium">-</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-400 text-xs">Lastik Ebat</p>
+                              <p className="font-medium">{vehicle.summerTireSize || "-"}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-400 text-xs">Lastik Oteli</p>
+                              <p className="font-medium">{vehicle.winterTireStatus === "DEPODA" ? "Var" : "Yok"}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-400 text-xs">RFT</p>
+                              <p className="font-medium">-</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-400 text-xs">Kış Lastiği</p>
+                              <p className="font-medium">{vehicle.winterTireStatus === "ARACTA" ? "Araçta" : vehicle.winterTireStatus === "DEPODA" ? "Depoda" : "Yok"}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-400 text-xs">GPS / CANBUS</p>
+                              <p className="font-medium">{vehicle.hasGps ? "Var" : "Yok"}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-400 text-xs">GPS / CANBUS No</p>
+                              <p className="font-medium">-</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-400 text-xs">Kasko Poliçe No</p>
+                              <p className="font-medium">-</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-400 text-xs">Kasko Şirketi</p>
+                              <p className="font-medium">{vehicle.insuranceCompany || "-"}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-400 text-xs">Kasko Bitiş</p>
+                              <p className="font-medium">-</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-400 text-xs">Kasko Prim</p>
+                              <p className="font-medium">-</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-400 text-xs">Trafik Poliçe No</p>
+                              <p className="font-medium">-</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-400 text-xs">Trafik Sigorta Şirketi</p>
+                              <p className="font-medium">-</p>
+                            </div>
                           </div>
                         </div>
                       )}
