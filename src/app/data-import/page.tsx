@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
-import { Database, Upload, FileSpreadsheet, Shield, CheckCircle, Eye } from "lucide-react";
+import { mockCustomers } from "@/mock/mockData";
+import { Database, Upload, FileSpreadsheet, Shield, CheckCircle, Building2, AlertCircle } from "lucide-react";
 
 export default function DataImportPage() {
   const router = useRouter();
   const [userRole, setUserRole] = useState<"VA" | "FY" | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<string>("");
 
   useEffect(() => {
     const role = localStorage.getItem("userRole") as "VA" | "FY" | null;
@@ -40,11 +42,10 @@ export default function DataImportPage() {
     {
       id: "tsb",
       title: "TSB Kasko Listesi",
-      description: "Araç kasko değerlerini yükle (Sadece VA)",
+      description: "Araç kasko değerlerini yükle",
       icon: FileSpreadsheet,
       format: "Excel (.xlsx)",
-      roles: ["VA"],
-      viewOnly: ["FY"],
+      requiresCustomer: false,
     },
     {
       id: "vehicles",
@@ -52,7 +53,7 @@ export default function DataImportPage() {
       description: "Toplu araç ekleme/güncelleme",
       icon: FileSpreadsheet,
       format: "Excel (.xlsx)",
-      roles: ["VA", "FY"],
+      requiresCustomer: true,
     },
     {
       id: "drivers",
@@ -60,7 +61,7 @@ export default function DataImportPage() {
       description: "Toplu sürücü ekleme/güncelleme",
       icon: FileSpreadsheet,
       format: "Excel (.xlsx)",
-      roles: ["VA", "FY"],
+      requiresCustomer: true,
     },
     {
       id: "expenses",
@@ -68,7 +69,7 @@ export default function DataImportPage() {
       description: "Yakıt, HGS, ceza verilerini yükle",
       icon: FileSpreadsheet,
       format: "Excel (.xlsx)",
-      roles: ["VA", "FY"],
+      requiresCustomer: true,
     },
     {
       id: "canbus",
@@ -76,7 +77,7 @@ export default function DataImportPage() {
       description: "Araç telematik verilerini yükle",
       icon: Database,
       format: "CSV / JSON",
-      roles: ["VA"],
+      requiresCustomer: true,
     },
   ];
 
@@ -96,52 +97,95 @@ export default function DataImportPage() {
             <Shield className="w-5 h-5 text-warning-600 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm text-warning-800 font-medium">Sadece Vero Admin (VA) Erişimi</p>
-              <p className="text-sm text-warning-600 mt-1">
+              <p className="text-sm text-warning-600 mt-1"
+                
                 Bu sayfadaki işlemler sistem genelini etkiler. Dikkatli kullanın.
               </p>
             </div>
           </div>
 
+          {/* Müşteri Seçimi - ZORUNLU */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <Building2 className="w-5 h-5 text-primary-600" />
+              <h2 className="font-semibold text-gray-900">Müşteri Seçimi *</h2>
+            </div>
+            
+            <select
+              value={selectedCustomer}
+              onChange={(e) => setSelectedCustomer(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="">Müşteri seçiniz...</option>
+              {mockCustomers.map((customer) => (
+                <option key={customer.id} value={customer.id}>
+                  {customer.name} ({customer.type === "KURUMSAL" ? "Kurumsal" : "Bireysel"})
+                </option>
+              ))}
+            </select>
+            
+            {!selectedCustomer && (
+              <div className="mt-3 flex items-center gap-2 text-danger-600 text-sm">
+                <AlertCircle className="w-4 h-4" />
+                <span>Yükleme yapmadan önce müşteri seçimi zorunludur.</span>
+              </div>
+            )}
+            
+            {selectedCustomer && (
+              <div className="mt-3 flex items-center gap-2 text-success-600 text-sm">
+                <CheckCircle className="w-4 h-4" />
+                <span>
+                  Seçilen: {mockCustomers.find(c => c.id === selectedCustomer)?.name}
+                </span>
+              </div>
+            )}
+          </div>
+
           {/* Yükleme Seçenekleri */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {importOptions
-              .filter((option) => option.roles.includes(userRole) || option.viewOnly?.includes(userRole))
-              .map((option) => {
-                const Icon = option.icon;
-                const isViewOnly = option.viewOnly?.includes(userRole);
-                return (
-                  <div
-                    key={option.id}
-                    className={`bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:border-primary-300 transition-colors ${isViewOnly ? 'opacity-75' : ''}`}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 bg-primary-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-6 h-6 text-primary-600" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">{option.title}</h3>
-                        <p className="text-sm text-gray-500 mt-1">{option.description}</p>
-                        <p className="text-xs text-gray-400 mt-2">Format: {option.format}</p>
+            {importOptions.map((option) => {
+              const Icon = option.icon;
+              const isDisabled = option.requiresCustomer && !selectedCustomer;
+              
+              return (
+                <div
+                  key={option.id}
+                  className={`bg-white rounded-xl border border-gray-200 p-6 shadow-sm transition-colors ${
+                    isDisabled ? 'opacity-50' : 'hover:border-primary-300'
+                  }`}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-primary-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-6 h-6 text-primary-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900">{option.title}</h3>
+                      <p className="text-sm text-gray-500 mt-1">{option.description}</p>
+                      <p className="text-xs text-gray-400 mt-2">Format: {option.format}</p>
+                      
+                      {option.requiresCustomer && (
+                        <p className="text-xs text-primary-600 mt-1">* Müşteri seçimi gerekli</p>
+                      )}
 
-                        <div className="mt-4">
-                          {isViewOnly ? (
-                            <div className="flex items-center justify-center w-full h-10 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-500">
-                              <Eye className="w-4 h-4 mr-2" />
-                              Sadece Görüntüleme
-                            </div>
-                          ) : (
-                            <label className="flex items-center justify-center w-full h-10 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-colors">
-                              <input type="file" className="hidden" accept=".xlsx,.csv,.json" />
-                              <Upload className="w-4 h-4 text-gray-400 mr-2" />
-                              <span className="text-sm text-gray-500">Dosya Seç</span>
-                            </label>
-                          )}
-                        </div>
+                      <div className="mt-4">
+                        {isDisabled ? (
+                          <div className="flex items-center justify-center w-full h-10 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-400">
+                            <AlertCircle className="w-4 h-4 mr-2" />
+                            Önce müşteri seçin
+                          </div>
+                        ) : (
+                          <label className="flex items-center justify-center w-full h-10 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-colors">
+                            <input type="file" className="hidden" accept=".xlsx,.csv,.json" />
+                            <Upload className="w-4 h-4 text-gray-400 mr-2" />
+                            <span className="text-sm text-gray-500">Dosya Seç</span>
+                          </label>
+                        )}
                       </div>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              );
+            })}
           </div>
 
           {/* Son İşlemler */}
@@ -154,7 +198,7 @@ export default function DataImportPage() {
                 <CheckCircle className="w-5 h-5 text-success-600" />
                 <div>
                   <p className="text-sm font-medium text-gray-900">Araç Listesi Güncellendi</p>
-                  <p className="text-xs text-gray-500">24 araç eklendi • 5 araç güncellendi • 05.04.2026 14:30</p>
+                  <p className="text-xs text-gray-500">24 araç eklendi • ABC Lojistik A.Ş. • 05.04.2026 14:30</p>
                 </div>
               </div>
             </div>
