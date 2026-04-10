@@ -43,6 +43,7 @@ export default function DataImportPage() {
       description: "Araç kasko değerlerini yükle",
       icon: FileSpreadsheet,
       format: "Excel (.xlsx)",
+      roles: ["VA"],
     },
     {
       id: "vehicles",
@@ -50,6 +51,7 @@ export default function DataImportPage() {
       description: "Toplu araç ekleme/güncelleme",
       icon: FileSpreadsheet,
       format: "Excel (.xlsx)",
+      roles: ["VA", "FY"],
     },
     {
       id: "drivers",
@@ -57,6 +59,7 @@ export default function DataImportPage() {
       description: "Toplu sürücü ekleme/güncelleme",
       icon: FileSpreadsheet,
       format: "Excel (.xlsx)",
+      roles: ["VA"],
     },
     {
       id: "expenses",
@@ -64,6 +67,7 @@ export default function DataImportPage() {
       description: "Yakıt, HGS, ceza verilerini yükle",
       icon: FileSpreadsheet,
       format: "Excel (.xlsx)",
+      roles: ["VA", "FY"],
     },
     {
       id: "canbus",
@@ -71,6 +75,7 @@ export default function DataImportPage() {
       description: "Araç telematik verilerini yükle",
       icon: Database,
       format: "CSV / JSON",
+      roles: ["VA"],
     },
   ];
 
@@ -98,34 +103,36 @@ export default function DataImportPage() {
 
           {/* Yükleme Seçenekleri */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {importOptions.map((option) => {
-              const Icon = option.icon;
-              return (
-                <div
-                  key={option.id}
-                  className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:border-primary-300 transition-colors"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-primary-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Icon className="w-6 h-6 text-primary-600" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">{option.title}</h3>
-                      <p className="text-sm text-gray-500 mt-1">{option.description}</p>
-                      <p className="text-xs text-gray-400 mt-2">Format: {option.format}</p>
+            {importOptions
+              .filter((option) => option.roles.includes(userRole))
+              .map((option) => {
+                const Icon = option.icon;
+                return (
+                  <div
+                    key={option.id}
+                    className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:border-primary-300 transition-colors"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-primary-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-6 h-6 text-primary-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900">{option.title}</h3>
+                        <p className="text-sm text-gray-500 mt-1">{option.description}</p>
+                        <p className="text-xs text-gray-400 mt-2">Format: {option.format}</p>
 
-                      <div className="mt-4">
-                        <label className="flex items-center justify-center w-full h-10 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-colors">
-                          <input type="file" className="hidden" accept=".xlsx,.csv,.json" />
-                          <Upload className="w-4 h-4 text-gray-400 mr-2" />
-                          <span className="text-sm text-gray-500">Dosya Seç</span>
-                        </label>
+                        <div className="mt-4">
+                          <label className="flex items-center justify-center w-full h-10 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-colors">
+                            <input type="file" className="hidden" accept=".xlsx,.csv,.json" />
+                            <Upload className="w-4 h-4 text-gray-400 mr-2" />
+                            <span className="text-sm text-gray-500">Dosya Seç</span>
+                          </label>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
 
           {/* Son İşlemler */}

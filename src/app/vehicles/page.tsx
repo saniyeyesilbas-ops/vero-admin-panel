@@ -41,10 +41,12 @@ export default function VehiclesPage() {
               <Car className="w-7 h-7 text-primary-600" />
               <h1 className="text-2xl font-bold text-gray-900">Araçlar</h1>
             </div>
-            <button className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors">
-              <Plus className="w-5 h-5" />
-              Yeni Araç
-            </button>
+            {userRole === "VA" && (
+              <button className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors">
+                <Plus className="w-5 h-5" />
+                Yeni Araç
+              </button>
+            )}
           </div>
 
           {/* Arama */}
