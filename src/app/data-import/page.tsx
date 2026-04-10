@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
-import { Database, Upload, FileSpreadsheet, Shield, CheckCircle } from "lucide-react";
+import { Database, Upload, FileSpreadsheet, Shield, CheckCircle, Eye } from "lucide-react";
 
 export default function DataImportPage() {
   const router = useRouter();
@@ -40,10 +40,11 @@ export default function DataImportPage() {
     {
       id: "tsb",
       title: "TSB Kasko Listesi",
-      description: "Araç kasko değerlerini yükle",
+      description: "Araç kasko değerlerini yükle (Sadece VA)",
       icon: FileSpreadsheet,
       format: "Excel (.xlsx)",
       roles: ["VA"],
+      viewOnly: ["FY"],
     },
     {
       id: "vehicles",
@@ -59,7 +60,7 @@ export default function DataImportPage() {
       description: "Toplu sürücü ekleme/güncelleme",
       icon: FileSpreadsheet,
       format: "Excel (.xlsx)",
-      roles: ["VA"],
+      roles: ["VA", "FY"],
     },
     {
       id: "expenses",
@@ -104,13 +105,14 @@ export default function DataImportPage() {
           {/* Yükleme Seçenekleri */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {importOptions
-              .filter((option) => option.roles.includes(userRole))
+              .filter((option) => option.roles.includes(userRole) || option.viewOnly?.includes(userRole))
               .map((option) => {
                 const Icon = option.icon;
+                const isViewOnly = option.viewOnly?.includes(userRole);
                 return (
                   <div
                     key={option.id}
-                    className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:border-primary-300 transition-colors"
+                    className={`bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:border-primary-300 transition-colors ${isViewOnly ? 'opacity-75' : ''}`}
                   >
                     <div className="flex items-start gap-4">
                       <div className="w-12 h-12 bg-primary-50 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -122,11 +124,18 @@ export default function DataImportPage() {
                         <p className="text-xs text-gray-400 mt-2">Format: {option.format}</p>
 
                         <div className="mt-4">
-                          <label className="flex items-center justify-center w-full h-10 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-colors">
-                            <input type="file" className="hidden" accept=".xlsx,.csv,.json" />
-                            <Upload className="w-4 h-4 text-gray-400 mr-2" />
-                            <span className="text-sm text-gray-500">Dosya Seç</span>
-                          </label>
+                          {isViewOnly ? (
+                            <div className="flex items-center justify-center w-full h-10 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-500">
+                              <Eye className="w-4 h-4 mr-2" />
+                              Sadece Görüntüleme
+                            </div>
+                          ) : (
+                            <label className="flex items-center justify-center w-full h-10 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-colors">
+                              <input type="file" className="hidden" accept=".xlsx,.csv,.json" />
+                              <Upload className="w-4 h-4 text-gray-400 mr-2" />
+                              <span className="text-sm text-gray-500">Dosya Seç</span>
+                            </label>
+                          )}
                         </div>
                       </div>
                     </div>

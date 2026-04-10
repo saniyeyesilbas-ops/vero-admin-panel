@@ -26,7 +26,7 @@ const menuItems = [
   { href: "/dashboard", label: "Panel", icon: LayoutDashboard, roles: ["VA", "FY"] },
   { href: "/customers", label: "Müşteriler", icon: Building2, roles: ["VA"] },
   { href: "/suppliers", label: "Tedarikçiler", icon: Truck, roles: ["VA"] },
-  { href: "/drivers", label: "Sürücüler", icon: Users, roles: ["VA"] },
+  { href: "/drivers", label: "Sürücüler", icon: Users, roles: ["VA", "FY"] },
   { href: "/vehicles", label: "Araçlar", icon: Car, roles: ["VA", "FY"] },
   { href: "/requests", label: "Talepler", icon: ClipboardList, roles: ["VA", "FY"] },
   { href: "/alerts", label: "Sistem Uyarıları", icon: AlertTriangle, roles: ["VA", "FY"] },
