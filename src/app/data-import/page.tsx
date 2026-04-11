@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
+import { importAPI } from "@/lib/api";
 import { mockCustomers } from "@/mock/mockData";
 import { Database, Upload, FileSpreadsheet, Shield, CheckCircle, Building2, AlertCircle } from "lucide-react";
 
@@ -10,6 +11,8 @@ export default function DataImportPage() {
   const router = useRouter();
   const [userRole, setUserRole] = useState<"VA" | "FY" | null>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<string>("");
+  const [uploading, setUploading] = useState<string | null>(null);
+  const [result, setResult] = useState<any>(null);
 
   useEffect(() => {
     const role = localStorage.getItem("userRole") as "VA" | "FY" | null;
@@ -19,6 +22,42 @@ export default function DataImportPage() {
       setUserRole(role);
     }
   }, [router]);
+
+  async function handleUpload(type: string, file: File) {
+    try {
+      setUploading(type);
+      setResult(null);
+
+      let response;
+      const customerId = userRole === "VA" ? selectedCustomer : undefined;
+
+      switch (type) {
+        case "tsb":
+          response = await importAPI.uploadTSB(file);
+          break;
+        case "vehicles":
+          response = await importAPI.uploadVehicles(file, customerId);
+          break;
+        case "fuel":
+          response = await importAPI.uploadFuel(file, customerId);
+          break;
+        case "hgs":
+          response = await importAPI.uploadHGS(file, customerId);
+          break;
+        case "tpc":
+          response = await importAPI.uploadTPC(file, customerId);
+          break;
+        default:
+          throw new Error("Bilinmeyen import tipi");
+      }
+
+      setResult(response);
+    } catch (err: any) {
+      setResult({ error: err.message });
+    } finally {
+      setUploading(null);
+    }
+  }
 
   if (!userRole) return null;
 
@@ -165,9 +204,22 @@ export default function DataImportPage() {
                             <AlertCircle className="w-4 h-4 mr-2" />
                             Önce müşteri seçin
                           </div>
+                        ) : uploading === option.id ? (
+                          <div className="flex items-center justify-center w-full h-10 bg-primary-50 border border-primary-200 rounded-lg text-sm text-primary-600">
+                            <div className="animate-spin w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full mr-2" />
+                            Yükleniyor...
+                          </div>
                         ) : (
                           <label className="flex items-center justify-center w-full h-10 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-colors">
-                            <input type="file" className="hidden" accept=".xlsx,.csv,.json" />
+                            <input
+                              type="file"
+                              className="hidden"
+                              accept=".xlsx,.csv,.json"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleUpload(option.id, file);
+                              }}
+                            />
                             <Upload className="w-4 h-4 text-gray-400 mr-2" />
                             <span className="text-sm text-gray-500">Dosya Seç</span>
                           </label>
@@ -179,6 +231,23 @@ export default function DataImportPage() {
               );
             })}
           </div>
+
+          {result && (
+            <div className={`rounded-xl p-4 ${result.error ? 'bg-danger-50 border border-danger-200' : 'bg-success-50 border border-success-200'}`}>
+              <h3 className="font-semibold mb-2">{result.error ? 'Hata' : 'Yükleme Sonucu'}</h3>
+              {result.error ? (
+                <p className="text-danger-700">{result.error}</p>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-success-700">Başarılı: {result.result?.successCount}</p>
+                  <p className="text-warning-700">Başarısız: {result.result?.failCount}</p>
+                  {result.scope && (
+                    <p className="text-gray-600 text-sm">Müşteri: {result.scope.customerId}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
             <div className="p-4 border-b border-gray-200">

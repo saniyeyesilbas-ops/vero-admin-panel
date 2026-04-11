@@ -3,12 +3,16 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
-import { mockVehicles, vehicleStatuses, fuelTypes, transmissionTypes, serviceTypes, acquisitionTypes } from "@/mock/mockData";
-import { Car, Plus, Search, ChevronDown, ChevronUp } from "lucide-react";
+import { coreAPI } from "@/lib/api";
+import { vehicleStatuses, fuelTypes, transmissionTypes, serviceTypes, acquisitionTypes } from "@/mock/mockData";
+import { Car, Plus, Search, ChevronDown, ChevronUp, AlertCircle } from "lucide-react";
 
 export default function VehiclesPage() {
   const router = useRouter();
   const [userRole, setUserRole] = useState<"VA" | "FY" | null>(null);
+  const [vehicles, setVehicles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedVehicle, setExpandedVehicle] = useState<string | null>(null);
 
@@ -18,14 +22,27 @@ export default function VehiclesPage() {
       router.push("/");
     } else {
       setUserRole(role);
+      loadVehicles();
     }
   }, [router]);
 
-  const filteredVehicles = mockVehicles.filter((v) =>
-    v.plate.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    v.chassisNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    v.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    v.model.toLowerCase().includes(searchTerm.toLowerCase())
+  async function loadVehicles() {
+    try {
+      setLoading(true);
+      const response = await coreAPI.getVehicles();
+      setVehicles(response.data || []);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const filteredVehicles = vehicles.filter((v) =>
+    v.plate?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    v.chassisNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    v.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    v.model?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (!userRole) return null;
@@ -46,6 +63,20 @@ export default function VehiclesPage() {
               Yeni Araç
             </button>
           </div>
+
+          {error && (
+            <div className="bg-danger-50 border border-danger-200 rounded-lg p-4 flex items-center gap-2 text-danger-700">
+              <AlertCircle className="w-5 h-5" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full mx-auto"></div>
+              <p className="text-gray-500 mt-4">Yükleniyor...</p>
+            </div>
+          ) : (
 
           {/* Arama */}
           <div className="relative">
